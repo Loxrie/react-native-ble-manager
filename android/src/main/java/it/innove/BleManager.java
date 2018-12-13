@@ -464,7 +464,11 @@ class BleManager extends ReactContextBaseJavaModule implements ActivityEventList
 						bondStateStr = "BOND_NONE";
 						break;
 				}
+
 				Log.d(LOG_TAG, "bond state: " + bondStateStr);
+				WritableMap map = Arguments.createMap();
+				map.putString("bond", bondStateStr);
+				sendEvent("BleManagerDidUpdateState", map);
 
 				if (bondRequest != null && bondRequest.uuid.equals(device.getAddress())) {
 					if (bondState == BluetoothDevice.BOND_BONDED) {
