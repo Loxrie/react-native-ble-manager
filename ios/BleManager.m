@@ -748,14 +748,17 @@ RCT_EXPORT_METHOD(requestMTU:(NSString *)deviceUUID mtu:(NSInteger)mtu callback:
 - (void)centralManager:(CBCentralManager *)central didDisconnectPeripheral:(CBPeripheral *)peripheral error:(NSError *)error {
     NSLog(@"Peripheral Disconnected: %@", [peripheral uuidAsString]);
 
+    NSString *localizedDescription;
     if (error) {
         NSLog(@"Error: %@", error);
+        localizedDescription = [error localizedDescription];
     }
 
     NSString *peripheralUUIDString = [peripheral uuidAsString];
-
     NSString *errorStr = [NSString stringWithFormat:@"Peripheral did disconnect: %@", peripheralUUIDString];
-
+    if ([localizedDescription isEqualToString:@"The specified device has disconnected from us."]) {
+        errorStr = localizedDescription;
+    }
     RCTResponseSenderBlock connectCallback = [connectCallbacks valueForKey:peripheralUUIDString];
     if (connectCallback) {
         connectCallback(@[errorStr]);
