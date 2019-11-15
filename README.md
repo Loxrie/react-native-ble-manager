@@ -123,6 +123,7 @@ public class MainApplication extends Application implements ReactApplication {
 - If you have problem with old devices try avoid to connect/read/write to a peripheral during scan.
 - Android API >= 23 require the ACCESS_COARSE_LOCATION permission to scan for peripherals. React Native >= 0.33 natively support PermissionsAndroid like in the example.
 - Before write, read or start notification you need to call `retrieveServices` method
+- iOS >= 13 need `NSBluetoothAlwaysUsageDescription` key in `Info.plist` file
 
 ## Example
 The easiest way to test is simple make your AppRegistry point to our example component, like this:
@@ -152,6 +153,7 @@ __Arguments__
 The parameter is optional the configuration keys are:
 - `showAlert` - `Boolean` - [iOS only] Show or hide the alert if the bluetooth is turned off during initialization
 - `restoreIdentifierKey` - `String` - [iOS only] Unique key to use for CoreBluetooth state restoration
+- `queueIdentifierKey` - `String` - [iOS only] Unique key to use for a queue identifier on which CoreBluetooth events will be dispatched
 - `forceLegacy` - `Boolean` - [Android only] Force to use the LegacyScanManager
 
 __Examples__
@@ -646,13 +648,12 @@ __Arguments__
 - `id` - `String` - the id of the peripheral
 - `name` - `String` - the name of the peripheral
 - `rssi` - ` Number` - the RSSI value
-- `advertising` - `JSON` - the advertising payload, according to platforms:
-    - [Android] contains the raw `bytes` and  `data` (Base64 encoded string)
-    - [iOS] contains a JSON object with different keys according to [Apple's doc](https://developer.apple.com/documentation/corebluetooth/cbcentralmanagerdelegate/advertisement_data_retrieval_keys?language=objc), here are some examples:
-      - `kCBAdvDataChannel` - `Number`
-      - `kCBAdvDataIsConnectable` - `Number`
-      - `kCBAdvDataLocalName` - `String`
-      - `kCBAdvDataManufacturerData` - `JSON` - contains the raw `bytes` and  `data` (Base64 encoded string)
+- `advertising` - `JSON` - the advertising payload, here are some examples:
+    - `isConnetable` - `Boolean`
+    - `serviceUUIDs` - `Array of String`
+    - `manufacturerData` - `JSON` - contains the raw `bytes` and  `data` (Base64 encoded string)
+    - `serviceData` - `JSON` - contains the raw `bytes` and  `data` (Base64 encoded string)
+    - `txPowerLevel` - `Int`
 
 __Examples__
 ```js
@@ -679,6 +680,10 @@ __Arguments__
 __Example__
 ```js
 import { bytesToString } from 'convert-string';
+import { NativeModules, NativeEventEmitter } from 'react-native';
+
+const BleManagerModule = NativeModules.BleManager;
+const bleManagerEmitter = new NativeEventEmitter(BleManagerModule);
 
 async function connectAndPrepare(peripheral, service, characteristic) {
   // Connect to device
